@@ -225,7 +225,9 @@ class _LoginScreenState extends State<LoginScreen> {
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 590),
           child: Text(
-            'Control every drop with confidence.',
+            _register
+                ? 'Your smarter water system starts here'
+                : 'Control every drop with confidence.',
             style: sora(h1, color: const Color(0xFFE9F7F4), em: -.065, height: 1.03),
           ),
         ),
@@ -233,8 +235,11 @@ class _LoginScreenState extends State<LoginScreen> {
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 510),
           child: Text(
-            'Monitor energy, manage pump runtime, and keep your home water system '
-            'protected from one secure workspace.',
+            _register
+                ? 'Create your personal control room and bring reliable pump '
+                    'monitoring to everyone in your home.'
+                : 'Monitor energy, manage pump runtime, and keep your home water system '
+                    'protected from one secure workspace.',
             style: manrope(13, color: const Color(0xFF8DAAA6), height: 1.8),
           ),
         ),
@@ -353,7 +358,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 400),
                             child: Text(
-                              'Control every drop with confidence.',
+                              _register
+                                  ? 'Your smarter water system starts here.'
+                                  : 'Control every drop with confidence.',
                               style: sora(
                                 clamPx(32, MediaQuery.sizeOf(context).width * 1, 44),
                                 color: const Color(0xFFE9F7F4),
@@ -436,7 +443,7 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 9),
         Text(
           _register
-              ? 'Set up your profile to access the Aqua control room.'
+              ? 'Set up your profile to access the shimizu control room.'
               : 'Sign in to monitor and control your water pump.',
           style: manrope(
             11, color: const Color(0xFF7C8D8A),

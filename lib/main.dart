@@ -11,11 +11,12 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final state = await AppState.load();
 
-  runApp(
-    DevicePreview(
-      builder: (context) => MyShimizuApp(state: state)
-    )
-  );
+  // runApp(
+  //   DevicePreview(
+  //     builder: (context) => MyShimizuApp(state: state)
+  //   )
+  // );
+  runApp(MyShimizuApp(state: state));
 }
 
 class MyShimizuApp extends StatelessWidget {
