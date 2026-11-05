@@ -1,20 +1,22 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:myshimizu/core/app_state.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:myshimizu/core/formatters.dart';
 import 'package:myshimizu/core/theme.dart';
+import 'package:myshimizu/models/app_user.dart';
+import 'package:myshimizu/providers/auth_provider.dart';
 import 'package:myshimizu/widgets/app_icon.dart';
 import 'package:myshimizu/widgets/common.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _fullName = TextEditingController();
   final _email = TextEditingController(text: 'rizky@aquacontrol.id');
   final _password = TextEditingController();
@@ -44,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _submit() {
-    final app = AppScope.of(context);
+    final app = ref.read(authProvider.notifier);
     final email = _email.text.trim();
 
     if (_register) {

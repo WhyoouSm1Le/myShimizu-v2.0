@@ -1,8 +1,10 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:myshimizu/core/app_state.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:myshimizu/core/formatters.dart';
 import 'package:myshimizu/core/theme.dart';
+import 'package:myshimizu/providers/auth_provider.dart';
+import 'package:myshimizu/providers/pump_provider.dart';
 import 'package:myshimizu/screens/duration_dialog.dart';
 import 'package:myshimizu/widgets/app_header.dart';
 import 'package:myshimizu/widgets/app_icon.dart';
@@ -10,14 +12,14 @@ import 'package:myshimizu/widgets/cards.dart';
 import 'package:myshimizu/widgets/common.dart';
 import 'package:myshimizu/widgets/pump_visual.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ValueNotifier<int> _selected = ValueNotifier<int>(10);
 
   @override
@@ -26,27 +28,31 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  Future<void> _handlePower(AppState s) async {
-    if (s.pumpOn) {
-      s.stopPump();
+  Future<void> _handlePower() async {
+    final pump = ref.read(pumpProvider.notifier);
+    if (ref.read(pumpOnProvider)) {
+      pump.stop();
       return;
     }
     final minutes = await showDurationDialog(context, selected: _selected);
-    if (minutes != null) s.startPump(minutes);
+    if (!mounted) return;
+    if (minutes != null) pump.start(minutes);
   }
 
   @override
   Widget build(BuildContext context) {
-    final s = AppScope.of(context);
+    final pumpOn = ref.watch(pumpOnProvider);
+    final remaining = ref.watch(remainingSecondsProvider);
+    final user = ref.watch(authProvider);
     final screen = screenOf(MediaQuery.sizeOf(context).width);
     final mobile = screen == Screen.mobile;
-    final firsName = (s.user?.name ?? '').split(' ').first;
+    final firstName = (user?.name ?? '').split(' ').first;
 
     final control = _ControlCard(
-      pumpOn: s.pumpOn, 
-      remaining: s.remainingSeconds, 
+      pumpOn: pumpOn, 
+      remaining: remaining, 
       mobile: mobile, 
-      onPower: () => _handlePower(s),
+      onPower: _handlePower,
     );
 
     final connection = StatusCard(
@@ -64,8 +70,8 @@ class _HomeScreenState extends State<HomeScreen> {
       icon: 'droplet', 
       green: false, 
       kicker: 'FLOW STATUS', 
-      title: s.pumpOn ? 'Water flow is normal' : 'No water flow', 
-      body: s.pumpOn ? '18.4 liters / minute' : 'Pump is currently on standby',
+      title: pumpOn ? 'Water flow is normal' : 'No water flow', 
+      body: pumpOn ? '18.4 liters / minute' : 'Pump is currently on standby',
       trailing: const MiniBadge('NORMAL'),
       compact: mobile,
       minHeight: mobile ? 92 : 104,
@@ -76,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         AppHeader(
           eyebrow: headerDate(DateTime.now()), 
-          title: 'Hello, $firsName',
+          title: 'Hello, $firstName',
         ),
         if (mobile) ...[
           SizedBox(

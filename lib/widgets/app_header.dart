@@ -1,15 +1,19 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:myshimizu/core/app_state.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:myshimizu/core/formatters.dart';
 import 'package:myshimizu/core/theme.dart';
+import 'package:myshimizu/models/pump_history.dart';
+import 'package:myshimizu/providers/auth_provider.dart';
+import 'package:myshimizu/providers/history_provider.dart';
 import 'package:myshimizu/widgets/app_icon.dart';
 import 'package:myshimizu/widgets/common.dart';
 
 // - HEADER HALAMAN: EYEBROW + JUDUL, TOMBOL NOTIFIKASI (RIWAYAT POMPA), DAN AVATAR (AKUN)
-class AppHeader extends StatefulWidget {
+class AppHeader extends ConsumerStatefulWidget {
   final String eyebrow;
   final String title;
+
   const AppHeader({
     super.key,
     required this.eyebrow,
@@ -17,10 +21,10 @@ class AppHeader extends StatefulWidget {
   });
 
   @override
-  State<AppHeader> createState() => _AppHeaderState();
+  ConsumerState<AppHeader> createState() => _AppHeaderState();
 }
 
-class _AppHeaderState extends State<AppHeader> {
+class _AppHeaderState extends ConsumerState<AppHeader> {
   final _portal = OverlayPortalController();
   final _historyLink = LayerLink();
   final _accountLink = LayerLink();
@@ -49,6 +53,7 @@ class _AppHeaderState extends State<AppHeader> {
     final screen = screenOf(width);
     final mobile = screen == Screen.mobile;
     final btn = mobile ? 38.0 : 40.0;
+
     final titleSize = mobile
         ? (width <= 390 ? 26.0 : 29.0)
         : clamPx(28, width * .03, 38);
@@ -212,7 +217,7 @@ class _AppHeaderState extends State<AppHeader> {
     Widget popover = isHistory
         ? _HistoryPopover(width: math.min(390, mq.size.width - 30), fluid: mobile)
         : _AccountPopover(onLogout: () {
-          AppScope.of(context).logout();
+          ref.read(authProvider.notifier).logout();
         });
 
     popover = TapRegion(
@@ -246,17 +251,18 @@ class _AppHeaderState extends State<AppHeader> {
 }
 
 // - POPOVER RIWAYAT -
-class _HistoryPopover extends StatelessWidget {
+class _HistoryPopover extends ConsumerWidget {
   final double width;
   final bool fluid;
+
   const _HistoryPopover({
     required this.width,
     required this.fluid,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final history = AppScope.of(context).history;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final history = ref.watch(historyProvider);
     final content = Glass(
       blur: 24,
       radius: BorderRadius.circular(20),
@@ -340,6 +346,7 @@ class _HistoryPopover extends StatelessWidget {
 
 class _HistoryRow extends StatelessWidget {
   final PumpHistory item;
+
   const _HistoryRow(this.item);
 
   @override
@@ -397,14 +404,15 @@ class _HistoryRow extends StatelessWidget {
 }
 
 // - POPOVER AKUN -
-class _AccountPopover extends StatelessWidget {
+class _AccountPopover extends ConsumerWidget {
   final VoidCallback onLogout;
+
   const _AccountPopover({required this.onLogout});
 
   @override
-  Widget build(BuildContext context) {
-    final user = AppScope.of(context).user;
-
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authProvider);
+    
     return SizedBox(
       width: 255,
       child: Glass(
